@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { generateAccessToken, generateRefreshToken } from "../lib/utils";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  sendVerificationCode,
+} from "../lib/utils";
 import User from "../models/users.mode";
 
 export const signUp = async (req: Request, res: Response) => {
@@ -12,6 +16,7 @@ export const signUp = async (req: Request, res: Response) => {
       return res.status(400).json({ data: errors.array() });
     }
 
+    // getting photo url
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     const photoURL = `${baseUrl}/api/users/photos/${req.file?.filename}`;
 
@@ -36,6 +41,9 @@ export const signUp = async (req: Request, res: Response) => {
     if (!result) {
       return res.status(500).json({ message: "Internal server error" });
     }
+
+    // sending a verification code the user's email
+    await sendVerificationCode(userData.name, userData.email, 4805);
 
     // setting accessToken to the browser cookie for authentication
     res.cookie("accessToken", accessToken, {
