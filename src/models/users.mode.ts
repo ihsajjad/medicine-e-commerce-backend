@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { UserDataType } from "../lib/shared";
+import { UserDataType } from "../lib/types";
 
 const userSchema = new Schema<UserDataType>({
   name: { type: String, required: true },

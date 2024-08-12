@@ -10,6 +10,7 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
+import userRoutes from "../src/routes/users.route";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ mongoose
   .then(() => console.log("DB is connected"));
 
 // routes
+app.use("/api/users/", userRoutes);
 
 // swagger docs function
 // swaggerDocs(app, parseInt(port.toString()));
