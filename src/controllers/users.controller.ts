@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
+import fs from "fs";
+import path from "path";
 import {
   generateAccessToken,
+  generateRandomCode,
   generateRefreshToken,
   sendVerificationCode,
 } from "../lib/utils";
-import User from "../models/users.mode";
+import User from "../models/users.model";
+import { uploadDir } from "../routes/users.route";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
@@ -42,8 +46,9 @@ export const signUp = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // sending a verification code the user's email
-    await sendVerificationCode(userData.name, userData.email, 4805);
+    // sending a verification code to the user's email
+    const code = generateRandomCode(); // utils function
+    await sendVerificationCode(userData.name, userData.email, code);
 
     // setting accessToken to the browser cookie for authentication
     res.cookie("accessToken", accessToken, {
@@ -56,5 +61,18 @@ export const signUp = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// get single photo by the filename
+export const getPhoto = async (req: Request, res: Response) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadDir, filename);
+
+  // if the file exists send the response else send error
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send("File not found");
   }
 };

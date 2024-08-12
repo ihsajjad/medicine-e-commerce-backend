@@ -5,17 +5,17 @@
  * Date: 11/8/2024
  */
 
-import express, { Request, Response } from "express";
+import express from "express";
 import { check } from "express-validator";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
-import { signUp } from "../controllers/users.controller";
+import { getPhoto, signUp } from "../controllers/users.controller";
 
 const router = express.Router();
 
 // ================================== Start Multer configuration area ============================
-const uploadDir = path.join(__dirname, "../../public/photos");
+export const uploadDir = path.join(__dirname, "../../public/photos");
 
 // if directory doesn't exist create one
 if (!fs.existsSync(uploadDir)) {
@@ -38,18 +38,8 @@ const upload = multer({ storage: storage });
 // sign up
 router.post("/sign-up", upload.single("photo"), validateSignUpData(), signUp);
 
-// getting single photo
-router.get("/photos/:filename", (req: Request, res: Response) => {
-  const filename = req.params.filename;
-  const filePath = path.join(uploadDir, filename);
-
-  // if the file exists send the response else send error
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).send("File not found");
-  }
-});
+// getting single photo by the filename
+router.get("/photos/:filename", getPhoto);
 
 // validating user input
 function validateSignUpData() {

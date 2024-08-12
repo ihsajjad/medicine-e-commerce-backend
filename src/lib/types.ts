@@ -13,3 +13,9 @@ export type UserDataType = {
   accessToken?: string;
   refreshToken?: string;
 };
+
+export type VerificationCodeType = {
+  id: ObjectId;
+  email: string;
+  code: number;
+};

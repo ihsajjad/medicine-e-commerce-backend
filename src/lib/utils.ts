@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import Code from "../models/codes.model";
 
 export const generateRefreshToken = (userId: string, userRole: string) => {
   const token = jwt.sign(
@@ -25,6 +26,7 @@ export const generateAccessToken = (refreshToken: string) => {
   return token;
 };
 
+// It will send the verification code to the user's email and save to the DB
 export const sendVerificationCode = (
   userName: string,
   email: string,
@@ -70,8 +72,18 @@ export const sendVerificationCode = (
              </html>`,
     });
 
+    //   saving the sended code to the database to verify in future
+    const newCode = new Code({ code, email });
+    await newCode.save();
+
     return info;
   }
 
   return main().catch(console.error);
+};
+
+// Generate random code to send to the user's email
+export const generateRandomCode = () => {
+  const code = Math.ceil(Math.random() * 10000);
+  return code;
 };
