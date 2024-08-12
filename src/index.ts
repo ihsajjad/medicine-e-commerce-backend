@@ -27,9 +27,6 @@ mongoose
 // routes
 app.use("/api/users/", userRoutes);
 
-// swagger docs function
-// swaggerDocs(app, parseInt(port.toString()));
-
 app.get("/", (_, res) => {
   res.json({ message: "Server is running on port : 3000" });
 });

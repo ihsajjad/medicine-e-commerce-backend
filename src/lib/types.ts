@@ -10,4 +10,6 @@ export type UserDataType = {
   emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  accessToken?: string;
+  refreshToken?: string;
 };
