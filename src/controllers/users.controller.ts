@@ -37,8 +37,14 @@ export const signUp = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    console.log(result);
-    res.json({ message: "Success" });
+    // setting accessToken to the browser cookie for authentication
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(Date.now() + 3600000),
+    });
+
+    res.json({ message: "User was created successfully" });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });

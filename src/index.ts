@@ -15,7 +15,12 @@ import userRoutes from "../src/routes/users.route";
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.NODE_ENV === "production" ? "" : "http://localhost:3000",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 
