@@ -16,7 +16,6 @@ const userSchema = new Schema<UserDataType>({
   emailVerified: { type: Boolean, default: false },
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
-  accessToken: { type: String, required: true },
   refreshToken: { type: String, required: true },
 });
 

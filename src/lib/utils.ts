@@ -2,10 +2,10 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import Code from "../models/codes.model";
 
-export const generateRefreshToken = (userId: string, userRole: string) => {
+export const generateRefreshToken = (email: string, role: string) => {
   const token = jwt.sign(
-    { userId, userRole },
-    process.env.JWT_SECRET_KEY as string,
+    { email, role },
+    process.env.JWT_REFRESH_SECRET_KEY as string,
     {
       expiresIn: "1d",
     }
@@ -14,10 +14,10 @@ export const generateRefreshToken = (userId: string, userRole: string) => {
   return token;
 };
 
-export const generateAccessToken = (refreshToken: string) => {
+export const generateAccessToken = (email: string, role: string) => {
   const token = jwt.sign(
-    { refreshToken },
-    process.env.JWT_SECRET_KEY as string,
+    { email, role },
+    process.env.JWT_ACCESS_SECRET_KEY as string,
     {
       expiresIn: "1h",
     }
@@ -86,4 +86,14 @@ export const sendVerificationCode = (
 export const generateRandomCode = () => {
   const code = Math.ceil(Math.random() * 10000);
   return code;
+};
+
+// Function to encode userId to base64
+export const encodingToBase64 = (userId: string) => {
+  return Buffer.from(userId).toString("base64");
+};
+
+// Function to decode userId to base64
+export const base64ToDecode = (userId: string) => {
+  return Buffer.from(userId, "base64").toString("utf-8");
 };

@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import fs from "fs";
 import path from "path";
 import {
+  encodingToBase64,
   generateAccessToken,
   generateRandomCode,
   generateRefreshToken,
@@ -31,12 +32,11 @@ export const signUp = async (req: Request, res: Response) => {
 
     // built-in utils function to refresh and access tokens
     const refreshToken = generateRefreshToken(userData.email, "User");
-    const accessToken = generateAccessToken(refreshToken);
+    const accessToken = generateAccessToken(userData.email, "User");
 
     userData.photo = photoURL;
     userData.createdAt = Date.now();
     userData.updatedAt = Date.now();
-    userData.accessToken = accessToken;
     userData.refreshToken = refreshToken;
 
     const newUser = new User(userData);
@@ -54,7 +54,14 @@ export const signUp = async (req: Request, res: Response) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      expires: new Date(Date.now() + 3600000),
+      expires: new Date(Date.now() + 3600000), // expires in 1h
+    });
+
+    // setting hashed userId to the user's browser
+    res.cookie("userId", encodingToBase64(newUser._id.toString()), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(Date.now() + 86400000), // expires in 1d
     });
 
     res.json({ message: "User was created successfully" });

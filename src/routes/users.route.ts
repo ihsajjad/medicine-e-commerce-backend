@@ -11,6 +11,7 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import { getPhoto, signUp } from "../controllers/users.controller";
+import { verifyAccessToken } from "../middleware/verifyTokens";
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ const upload = multer({ storage: storage });
 router.post("/sign-up", upload.single("photo"), validateSignUpData(), signUp);
 
 // getting single photo by the filename
-router.get("/photos/:filename", getPhoto);
+router.get("/photos/:filename", verifyAccessToken, getPhoto);
 
 // validating user input
 function validateSignUpData() {
