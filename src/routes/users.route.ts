@@ -15,6 +15,7 @@ import {
   signIn,
   signUp,
   verificationCode,
+  verifyCode,
 } from "../controllers/users.controller";
 import { verifyTokens } from "../middleware/verifyTokens";
 
@@ -56,6 +57,14 @@ router.post(
 
 // get verification code
 router.get("/verification-code", verifyTokens, verificationCode);
+
+// Route to match the verification code
+router.post(
+  "/verify-code",
+  [check("code", "Code is required").isNumeric()],
+  verifyTokens,
+  verifyCode
+);
 
 // getting single photo by the filename
 router.get("/photos/:filename", getPhoto);

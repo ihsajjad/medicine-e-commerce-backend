@@ -10,6 +10,7 @@ import {
   generateRefreshToken,
   sendVerificationCode,
 } from "../lib/utils";
+import Code from "../models/codes.model";
 import User from "../models/users.model";
 import { uploadDir } from "../routes/users.route";
 
@@ -123,16 +124,42 @@ export const signIn = async (req: Request, res: Response) => {
 // Get verification code
 export const verificationCode = async (req: Request, res: Response) => {
   try {
-    const userData = await User.findById(req.userId);
+    const userData = await User.findOne({
+      email: req.userEmail,
+      emailVerified: false,
+    });
     if (!userData) {
-      return res.status(404).json({ message: "User doesn't exist" });
+      return res.status(400).json({ message: "Already verified" });
     }
 
     // sending a verification code to the user's email
     const code = generateRandomCode(); // utils function
     await sendVerificationCode(userData.name, userData.email, code);
 
-    res.json({ message: "Code was sent" });
+    res.json({ message: `Code was sent to ${req.userEmail}` });
+  } catch (error) {
+    console.log(__filename, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Function to verify code
+export const verifyCode = async (req: Request, res: Response) => {
+  try {
+    const code = req.query.code;
+    const email = req.userEmail;
+
+    const codeInDB = await Code.findOneAndDelete({ email, code });
+    if (!codeInDB) {
+      return res.status(400).json({ message: "The code is not valid!" });
+    }
+
+    await User.findOneAndUpdate(
+      { email, emailVerified: false },
+      { $set: { emailVerified: true } }
+    );
+
+    res.json({ message: "Verification successful" });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });
