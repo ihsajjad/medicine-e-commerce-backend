@@ -87,7 +87,7 @@ export const signIn = async (req: Request, res: Response) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch);
+
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -114,6 +114,25 @@ export const signIn = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "User login successful", data: user });
+  } catch (error) {
+    console.log(__filename, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get verification code
+export const verificationCode = async (req: Request, res: Response) => {
+  try {
+    const userData = await User.findById(req.userId);
+    if (!userData) {
+      return res.status(404).json({ message: "User doesn't exist" });
+    }
+
+    // sending a verification code to the user's email
+    const code = generateRandomCode(); // utils function
+    await sendVerificationCode(userData.name, userData.email, code);
+
+    res.json({ message: "Code was sent" });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });

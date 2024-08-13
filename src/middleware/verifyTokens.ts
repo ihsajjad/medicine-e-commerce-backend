@@ -9,11 +9,12 @@ declare global {
     interface Request {
       userEmail: string;
       userRole: string;
+      userId: string;
     }
   }
 }
 
-export const verifyAccessToken = async (
+export const verifyTokens = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -52,6 +53,7 @@ export const verifyAccessToken = async (
           const role = await (decodedRefreshToken as JwtPayload)?.role;
           req.userEmail = email;
           req.userRole = role;
+          req.userId = userId;
 
           // Refresh token is valid. Generate and set new accessToken
           const accessToken = generateAccessToken(email, role);
@@ -76,6 +78,7 @@ export const verifyAccessToken = async (
         const role = await (decodedAccessToken as JwtPayload)?.role;
         req.userEmail = email;
         req.userRole = role;
+        req.userId = userId;
 
         next();
       }

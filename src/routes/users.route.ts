@@ -10,7 +10,13 @@ import { check } from "express-validator";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
-import { getPhoto, signIn, signUp } from "../controllers/users.controller";
+import {
+  getPhoto,
+  signIn,
+  signUp,
+  verificationCode,
+} from "../controllers/users.controller";
+import { verifyTokens } from "../middleware/verifyTokens";
 
 const router = express.Router();
 
@@ -47,6 +53,9 @@ router.post(
   ],
   signIn
 );
+
+// get verification code
+router.get("/verification-code", verifyTokens, verificationCode);
 
 // getting single photo by the filename
 router.get("/photos/:filename", getPhoto);
