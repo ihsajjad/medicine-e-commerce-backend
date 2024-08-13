@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import fs from "fs";
@@ -12,6 +13,7 @@ import {
 import User from "../models/users.model";
 import { uploadDir } from "../routes/users.route";
 
+// Sign up user
 export const signUp = async (req: Request, res: Response) => {
   try {
     const userData = req.body;
@@ -30,7 +32,7 @@ export const signUp = async (req: Request, res: Response) => {
     if (isUserExists)
       return res.status(400).json({ message: "The email is already in use" });
 
-    // built-in utils function to refresh and access tokens
+    //Utils functions to generate refresh and access tokens
     const refreshToken = generateRefreshToken(userData.email, "User");
     const accessToken = generateAccessToken(userData.email, "User");
 
@@ -65,6 +67,53 @@ export const signUp = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "User was created successfully" });
+  } catch (error) {
+    console.log(__filename, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Sign in user
+export const signIn = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ data: errors.array() });
+    }
+
+    // checking user exists or not using the email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Utils functions to generate refresh and access tokens
+    const refreshToken = generateRefreshToken(email, user.role);
+    const accessToken = generateAccessToken(email, user.role);
+
+    // update refresh token
+    await User.findOneAndUpdate({ email }, { $set: { refreshToken } });
+
+    // setting accessToken to the browser cookie for authentication
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(Date.now() + 3600000), // expires in 1h
+    });
+
+    // setting hashed userId to the user's browser
+    res.cookie("userId", encodingToBase64(user._id.toString()), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(Date.now() + 86400000), // expires in 1d
+    });
+
+    res.json({ message: "User login successful", data: user });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });

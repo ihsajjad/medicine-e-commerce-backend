@@ -10,8 +10,7 @@ import { check } from "express-validator";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
-import { getPhoto, signUp } from "../controllers/users.controller";
-import { verifyAccessToken } from "../middleware/verifyTokens";
+import { getPhoto, signIn, signUp } from "../controllers/users.controller";
 
 const router = express.Router();
 
@@ -36,11 +35,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 // ================================== Start Multer configuration area ============================
 
-// sign up
+// Sign up user
 router.post("/sign-up", upload.single("photo"), validateSignUpData(), signUp);
 
+// Sign in user
+router.post(
+  "/sign-in",
+  [
+    check("email", "Email is required"),
+    check("password", "Password is required"),
+  ],
+  signIn
+);
+
 // getting single photo by the filename
-router.get("/photos/:filename", verifyAccessToken, getPhoto);
+router.get("/photos/:filename", getPhoto);
 
 // validating user input
 function validateSignUpData() {
