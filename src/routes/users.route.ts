@@ -11,6 +11,7 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import {
+  currentUser,
   getPhoto,
   signIn,
   signUp,
@@ -55,16 +56,14 @@ router.post(
   signIn
 );
 
+// Route to get current user
+router.get("/current-user", verifyTokens, currentUser);
+
 // get verification code
 router.get("/verification-code", verifyTokens, verificationCode);
 
 // Route to match the verification code
-router.post(
-  "/verify-code",
-  [check("code", "Code is required").isNumeric()],
-  verifyTokens,
-  verifyCode
-);
+router.post("/verify-code", verifyTokens, verifyCode);
 
 // getting single photo by the filename
 router.get("/photos/:filename", getPhoto);

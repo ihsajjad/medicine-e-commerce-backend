@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import fs from "fs";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import path from "path";
 import {
   encodingToBase64,
@@ -115,6 +116,26 @@ export const signIn = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "User login successful", data: user });
+  } catch (error) {
+    console.log(__filename, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Function to get current user
+export const currentUser = async (req: Request, res: Response) => {
+  try {
+    const accessToken = await req.cookies["accessToken"];
+    if (!accessToken) {
+      return res.status(403).json({ message: "Invalid access token" });
+    }
+
+    const { email, role } = jwt.verify(
+      accessToken,
+      process.env.JWT_ACCESS_SECRET_KEY as string
+    ) as JwtPayload;
+
+    res.json({ email, role });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });
