@@ -14,9 +14,10 @@ import {
   currentUser,
   getPhoto,
   signIn,
+  signOut,
   signUp,
   verificationCode,
-  verifyCode,
+  verifyEmail,
 } from "../controllers/users.controller";
 import { verifyTokens } from "../middleware/verifyTokens";
 
@@ -56,14 +57,17 @@ router.post(
   signIn
 );
 
+// Route to sign out user
+router.post("/sign-out", verifyTokens, signOut);
+
 // Route to get current user
 router.get("/current-user", verifyTokens, currentUser);
 
 // get verification code
 router.get("/verification-code", verifyTokens, verificationCode);
 
-// Route to match the verification code
-router.post("/verify-code", verifyTokens, verifyCode);
+// Route to match the verification email
+router.post("/verify-email", verifyTokens, verifyEmail);
 
 // getting single photo by the filename
 router.get("/photos/:filename", getPhoto);

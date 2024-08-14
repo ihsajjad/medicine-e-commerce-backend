@@ -130,6 +130,20 @@ export const signIn = async (req: Request, res: Response) => {
   }
 };
 
+// Function to sign out user
+export const signOut = async (req: Request, res: Response) => {
+  try {
+    await User.findByIdAndUpdate(req.userId, { $set: { accessToken: "" } });
+
+    res.cookie("accessToken", "", { expires: new Date(0) });
+    res.cookie("userId", "", { expires: new Date(0) });
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.log(__filename, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Function to get current user
 export const currentUser = async (req: Request, res: Response) => {
   try {
@@ -166,8 +180,8 @@ export const verificationCode = async (req: Request, res: Response) => {
   }
 };
 
-// Function to verify code
-export const verifyCode = async (req: Request, res: Response) => {
+// Function to verify email
+export const verifyEmail = async (req: Request, res: Response) => {
   try {
     const code = req.query.code;
     const email = req.userEmail;

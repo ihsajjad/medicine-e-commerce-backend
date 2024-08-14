@@ -84,7 +84,7 @@ export const sendVerificationCode = (
 
 // Generate random code to send to the user's email
 export const generateRandomCode = () => {
-  const code = Math.ceil(Math.random() * 10000);
+  const code = Math.floor(1000 + Math.random() * 9000);
   return code;
 };
 
