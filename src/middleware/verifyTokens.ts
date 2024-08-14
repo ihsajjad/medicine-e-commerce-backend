@@ -40,7 +40,7 @@ export const verifyTokens = async (
       // if the access token is expired then create one
       if (accessError) {
         const user = (await User.findById(userId)) as UserDataType;
-        const refreshToken = user.refreshToken as string;
+        const refreshToken = user?.refreshToken as string;
 
         try {
           // checking the refreshToken is valid or not

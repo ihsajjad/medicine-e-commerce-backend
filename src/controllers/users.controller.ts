@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import fs from "fs";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import path from "path";
+import { UserDataType } from "../lib/types";
 import {
   encodingToBase64,
   generateAccessToken,
@@ -68,7 +68,13 @@ export const signUp = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 86400000), // expires in 1d
     });
 
-    res.json({ message: "User was created successfully" });
+    res.json({
+      user: {
+        email: newUser.email,
+        role: newUser.role,
+        emailVerified: newUser.emailVerified,
+      },
+    });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });
@@ -115,7 +121,9 @@ export const signIn = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 86400000), // expires in 1d
     });
 
-    res.json({ message: "User login successful", data: user });
+    res.json({
+      user: { email, role: user.role, emailVerified: user.emailVerified },
+    });
   } catch (error) {
     console.log(__filename, error);
     res.status(500).json({ message: "Internal server error" });
@@ -125,20 +133,14 @@ export const signIn = async (req: Request, res: Response) => {
 // Function to get current user
 export const currentUser = async (req: Request, res: Response) => {
   try {
-    const accessToken = await req.cookies["accessToken"];
-    if (!accessToken) {
-      return res.status(403).json({ message: "Invalid access token" });
-    }
+    const { email, role, emailVerified } = (await User.findById(
+      req.userId
+    )) as UserDataType;
 
-    const { email, role } = jwt.verify(
-      accessToken,
-      process.env.JWT_ACCESS_SECRET_KEY as string
-    ) as JwtPayload;
-
-    res.json({ email, role });
+    res.json({ user: { email, role, emailVerified } });
   } catch (error) {
     console.log(__filename, error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error sdjflajslf" });
   }
 };
 
